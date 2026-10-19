@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAC-PAD // PROTOCOL (v22 - FAITH SECTOR EXPANSION)</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22TAC-PAD%20PROTOCOL%22,%22short_name%22:%22TAC-PAD%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%2307090A%22,%22theme_color%22:%22%2300FF66%22}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Rajdhani:wght@600;700;800&display=swap');
+
+        :root {
+            --tac-bg: #07090A;
+            --tac-panel: #0E1317;
+            --tac-border: #1E2830;
+            --tac-green: #00FF66;
+            --tac-green-dim: rgba(0, 255, 102, 0.12);
+            --tac-orange: #FF5500;
+            --tac-yellow: #FFCC00;
+            --tac-cyan: #00E5FF;
+            --tac-text: #E1E7ED;
+            --tac-muted: #627485;
+            --font-display: 'Teko', sans-serif;
+            --font-sub: 'Rajdhani', sans-serif;
+        }
+
+        /* Color Theme Variations */
+        body.theme-cyan { --tac-green: #00E5FF; --tac-green-dim: rgba(0, 229, 255, 0.15); }
+        body.theme-crimson { --tac-green: #FF2A55; --tac-green-dim: rgba(255, 42, 85, 0.15); }
+        body.theme-gold { --tac-green: #FFCC00; --tac-green-dim: rgba(255, 204, 0, 0.15); }
+        body.theme-oled { --tac-bg: #000000; --tac-panel: #050505; --tac-border: #1A1A1A; --tac-green: #00FF66; }
+        body.theme-desert { --tac-bg: #12100B; --tac-panel: #1C1912; --tac-border: #383224; --tac-green: #E6B800; --tac-green-dim: rgba(230, 184, 0, 0.15); }
+        body.theme-violet { --tac-bg: #0C0714; --tac-panel: #140D21; --tac-border: #2A1C40; --tac-green: #BD00FF; --tac-green-dim: rgba(189, 0, 255, 0.15); }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--tac-bg);
+            color: var(--tac-text);
+            font-family: var(--font-sub);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding-bottom: 95px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 255, 102, 0.08), transparent 75%),
+                linear-gradient(rgba(14, 19, 23, 0.85) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 19, 23, 0.85) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* --- MONETIZATION PRO BANNER --- */
+        .pro-banner {
+            background: linear-gradient(90deg, #1A1400 0%, #332600 100%);
+            border: 1px solid var(--tac-yellow);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
+        }
+
+        .pro-banner.unlocked {
+            background: linear-gradient(90deg, #001A0E 0%, #00331A 100%);
+            border-color: var(--tac-green);
+        }
+
+        .pro-status-text {
+            font-size: 11px;
+            color: var(--tac-yellow);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .pro-banner.unlocked .pro-status-text {
+            color: var(--tac-green);
+        }
+
+        .upgrade-btn-small {
+            background: var(--tac-yellow);
+            color: #000;
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .pro-banner.unlocked .upgrade-btn-small {
+            background: var(--tac-green);
+        }
+
+        /* --- TOP OPERATOR HUD --- */
+        .hud-header {
+            background: linear-gradient(180deg, #141C22 0%, #080C0E 100%);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-green);
+            padding: 12px 16px;
+            position: sticky;
+            top: 8px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+        }
+
+        .top-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .sys-status {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--tac-green);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .blink-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--tac-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--tac-green);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .streak-badge {
+            background: rgba(255, 85, 0, 0.2);
+            border: 1px solid var(--tac-orange);
+            color: var(--tac-orange);
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 700;
+            padding: 2px 8px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .callsign-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .operator-title {
+            font-family: var(--font-display);
+            font-size: 34px;
+            line-height: 0.85;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #FFF;
+            text-shadow: 0 0 12px rgba(255,255,255,0.25);
+        }
+
+        .prestige-badge {
+            background: var(--tac-orange);
+            color: #000;
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 700;
+            padding: 2px 10px;
+            letter-spacing: 1px;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            box-shadow: 0 0 10px rgba(255,85,0,0.4);
+        }
+
+        .rank-xp-container {
+            margin-top: 10px;
+        }
+
+        .xp-header-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--tac-muted);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .xp-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #040607;
+            border: 1px solid var(--tac-border);
+            position: relative;
+            padding: 1px;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--tac-orange), var(--tac-yellow));
+            width: 0%;
+            box-shadow: 0 0 12px rgba(255, 85, 0, 0.6);
+            transition: width 0.4s ease;
+        }
+
+        /* --- PANELS & TILES --- */
+        .tac-panel {
+            background: var(--tac-panel);
+            border: 1px solid var(--tac-border);
+            padding: 14px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .tac-panel::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid var(--tac-green);
+            border-right: 2px solid var(--tac-green);
+        }
+
+        .panel-header {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--tac-text);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--tac-border);
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+
+        .panel-tag {
+            font-size: 12px;
+            font-family: var(--font-sub);
+            color: var(--tac-orange);
+            background: rgba(255, 85, 0, 0.1);
+            padding: 2px 6px;
+            border: 1px solid rgba(255, 85, 0, 0.3);
+        }
+
+        .panel-tag.permanent {
+            color: var(--tac-green);
+            background: var(--tac-green-dim);
+            border-color: var(--tac-green);
+        }
+
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* --- SUB-NAVIGATION TABS --- */
+        .subnav-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .subnav-btn {
+            flex: 1;
+            background: #050708;
+            border: 1px solid var(--tac-border);
+            color: var(--tac-muted);
+            font-family: var(--font-display);
+            font-size: 15px;
+            padding: 6px 0;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .subnav-btn.active {
+            background: var(--tac-green-dim);
+            border-color: var(--tac-green);
+            color: var(--tac-green);
+            font-weight: 700;
+        }
+
+        /* --- SCRIPTURE & FAITH CARDS --- */
+        .verse-card {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-yellow);
+            padding: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.08);
+        }
+
+        .verse-ref {
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--tac-yellow);
+            letter-spacing: 1.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .verse-text {
+            font-size: 13px;
+            color: #FFF;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .verse-reflection {
+            font-size: 12px;
+            color: var(--tac-text);
+            background: rgba(255, 204, 0, 0.05);
+            border: 1px dashed rgba(255, 204, 0, 0.3);
+            padding: 8px 10px;
+            line-height: 1.4;
+        }
+
+        .journey-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-cyan);
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .journey-card.selected {
+            border-color: var(--tac-green);
+            background: var(--tac-green-dim);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+
+        .journey-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .journey-desc {
+            font-size: 12px;
+            color: var(--tac-text);
+            line-height: 1.4;
+        }
+
+        /* --- FOCUS TIMER HUD --- */
+        .timer-display {
+            font-family: var(--font-display);
+            font-size: 64px;
+            line-height: 1;
+            text-align: center;
+            color: var(--tac-green);
+            text-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            margin: 10px 0;
+            letter-spacing: 3px;
+        }
+
+        /* --- ANALYTICS BAR CHART --- */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 110px;
+            gap: 4px;
+            padding-top: 15px;
+            border-bottom: 1px solid var(--tac-border);
+        }
+
+        .chart-bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            background: var(--tac-green);
+            box-shadow: 0 0 8px var(--tac-green-dim);
+            min-height: 4px;
+            transition: height 0.3s;
+        }
+
+        .chart-label {
+            font-size: 9px;
+            color: var(--tac-muted);
+            margin-top: 4px;
+            font-weight: 700;
+        }
+
+        /* --- CLICKABLE SECTOR CARDS --- */
+        .sector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .sector-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sector-card:hover, .sector-card:active {
+            border-color: var(--tac-green);
+            background: rgba(0, 255, 102, 0.05);
+            box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+        }
+
+        .sector-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sector-code {
+            font-family: var(--font-display);
+            font-size: 17px;
+            letter-spacing: 1px;
+            color: #FFF;
+        }
+
+        .sector-lvl {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--tac-green);
+            background: var(--tac-green-dim);
+            padding: 1px 6px;
+        }
+
+        .sector-bar-bg {
+            height: 5px;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+
+        .sector-bar-fill {
+            height: 100%;
+            background: var(--tac-green);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 8px var(--tac-green);
+        }
+
+        .sector-tap-hint {
+            font-size: 10px;
+            color: var(--tac-muted);
+            text-align: right;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .deploy-btn {
+            background: #141C22;
+            border: 1px solid var(--tac-green);
+            color: var(--tac-green);
+            font-family: var(--font-display);
+            font-size: 16px;
+            letter-spacing: 1px;
+            padding: 5px 0;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 4px;
+            transition: all 0.15s;
+        }
+
+        .deploy-btn:active {
+            background: var(--tac-green);
+            color: #000;
+        }
+
+        /* --- RADAR / ATTRIBUTE MATRIX --- */
+        .radar-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        svg.tac-radar {
+            width: 100%;
+            max-width: 270px;
+            height: auto;
+            overflow: visible;
+        }
+
+        .radar-label {
+            font-size: 9px;
+            font-weight: 800;
+            fill: #8294A5;
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+
+        .radar-label:hover {
+            fill: var(--tac-green);
+        }
+
+        /* --- SECTOR DETAIL MODAL / VIEW --- */
+        .sector-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(4, 6, 8, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 2500;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .sector-modal.active {
+            display: flex;
+        }
+
+        .sector-detail-card {
+            background: var(--tac-panel);
+            border: 1px solid var(--tac-green);
+            width: 100%;
+            max-width: 440px;
+            padding: 18px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 0 35px rgba(0, 255, 102, 0.25);
+        }
+
+        .suggestion-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            border-left: 3px solid var(--tac-cyan);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .suggestion-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFF;
+        }
+
+        .suggestion-desc {
+            font-size: 12px;
+            color: var(--tac-text);
+            line-height: 1.35;
+        }
+
+        .add-suggested-btn {
+            background: #141C22;
+            border: 1px solid var(--tac-cyan);
+            color: var(--tac-cyan);
+            font-family: var(--font-display);
+            font-size: 15px;
+            padding: 4px 8px;
+            cursor: pointer;
+            text-align: center;
+            align-self: flex-start;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .add-suggested-btn:active {
+            background: var(--tac-cyan);
+            color: #000;
+        }
+
+        /* --- SETTINGS ROW & TOGGLES --- */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .setting-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFF;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-desc {
+            font-size: 11px;
+            color: var(--tac-muted);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #000;
+            border: 1px solid var(--tac-border);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-switch.active {
+            background: var(--tac-green-dim);
+            border-color: var(--tac-green);
+        }
+
+        .toggle-knob {
+            width: 18px;
+            height: 18px;
+            background: var(--tac-muted);
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.2s;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            left: 27px;
+            background: var(--tac-green);
+            box-shadow: 0 0 8px var(--tac-green);
+        }
+
+        /* --- DIRECTIVES, STORE & AI CARDS --- */
+        .directive-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-orange);
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .directive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .directive-code {
+            font-size: 11px;
+            color: var(--tac-orange);
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .directive-title {
+            font-size: 15px;
+            color: #FFF;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .directive-box {
+            background: rgba(255, 85, 0, 0.05);
+            border: 1px dashed rgba(255, 85, 0, 0.3);
+            padding: 8px 10px;
+            font-size: 12px;
+            color: var(--tac-text);
+            line-height: 1.4;
+        }
+
+        .directive-box strong {
+            color: var(--tac-yellow);
+        }
+
+        .store-card {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-yellow);
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .store-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .store-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFF;
+        }
+
+        .store-desc {
+            font-size: 11px;
+            color: var(--tac-muted);
+        }
+
+        .buy-btn {
+            background: var(--tac-yellow);
+            color: #000;
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .ai-feedback-box {
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid var(--tac-cyan);
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--tac-text);
+            line-height: 1.4;
+        }
+
+        /* --- ORDERS & GOALS LIST --- */
+        .order-item {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-yellow);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .order-item.completed {
+            border-left-color: var(--tac-green);
+            background: rgba(0, 255, 102, 0.05);
+            opacity: 0.65;
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .order-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFF;
+            letter-spacing: 0.5px;
+        }
+
+        .order-reward {
+            font-size: 11px;
+            color: var(--tac-yellow);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .complete-checkbox {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--tac-yellow);
+            background: transparent;
+            color: transparent;
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .order-item.completed .complete-checkbox {
+            background: var(--tac-green);
+            border-color: var(--tac-green);
+            color: #000;
+            box-shadow: 0 0 10px var(--tac-green);
+        }
+
+        .input-box {
+            width: 100%;
+            background: #050708;
+            border: 1px solid var(--tac-border);
+            color: #FFF;
+            font-family: var(--font-sub);
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: var(--tac-green);
+        }
+
+        textarea.input-box {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .add-form-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .sec-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--tac-border);
+            color: var(--tac-text);
+            font-family: var(--font-display);
+            font-size: 16px;
+            padding: 9px 0;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .sec-btn.danger {
+            background: rgba(255, 42, 85, 0.15);
+            border-color: #FF2A55;
+            color: #FF2A55;
+        }
+
+        .sec-btn.primary {
+            background: var(--tac-green-dim);
+            border-color: var(--tac-green);
+            color: var(--tac-green);
+        }
+
+        .sec-btn:active {
+            background: var(--tac-orange);
+            color: #000;
+        }
+
+        .journal-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--tac-border);
+            border-left: 4px solid var(--tac-green);
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .journal-date {
+            font-size: 11px;
+            color: var(--tac-muted);
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .journal-text {
+            font-size: 13px;
+            color: #FFF;
+            line-height: 1.4;
+        }
+
+        /* --- MODAL DIALOG --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0E1317;
+            border: 2px solid var(--tac-yellow);
+            padding: 20px;
+            max-width: 380px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.4);
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            color: var(--tac-yellow);
+            letter-spacing: 1px;
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: var(--tac-text);
+            line-height: 1.4;
+        }
+
+        /* --- BOTTOM NAVIGATION BAR --- */
+        .cod-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #080C0E;
+            border-top: 2px solid var(--tac-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 200;
+        }
+
+        .cod-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--tac-muted);
+            font-family: var(--font-display);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            width: 10%;
+        }
+
+        .cod-nav-item.active {
+            color: var(--tac-green);
+            border-bottom: 2px solid var(--tac-green);
+        }
+
+        #tac-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--tac-green);
+            color: #000;
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 8px 24px;
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+            box-shadow: 0 0 24px rgba(0,255,102,0.8);
+            transition: transform 0.25s ease-out;
+            z-index: 3000;
+        }
+
+        #tac-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tac-toast">DATA SAVED // AUTO-SYNC ENABLED</div>
+
+    <!-- WHAT YOU GET IN PREMIUM BREAKDOWN MODAL -->
+    <div class="modal-overlay" id="premium-info-modal">
+        <div class="modal-box">
+            <div class="modal-title">⚡ BATTLE PASS PRO UNLOCK</div>
+            <div class="modal-desc">
+                <strong>WHAT IS UNLOCKED WITH PREMIUM ($4.99/MO):</strong>
+                <br><br>
+                1. 🔓 <strong>UNLIMITED FIELD ORDERS:</strong> Removes the 6-order cap for creating daily habits.<br>
+                2. ✝️ <strong>EXPANDED FAITH JOURNEYS & SCRIPTURE LIBRARY:</strong> Full access to all 4 Faith Tracks.<br>
+                3. 🏋️‍♂️ <strong>ADVANCED GYM & NUTRITION PROGRAMMING:</strong> Full custom workout builder.<br>
+                4. 🤖 <strong>AI RECON DEBRIEF ANALYZER:</strong> Automated daily feedback on your Field Journal AARs.<br>
+                5. 🎨 <strong>ALL HUD THEMES UNLOCKED:</strong> Stealth Green, Cyber Cyan, Crimson, Gold, OLED Black, Desert, and Violet.
+            </div>
+            <div class="action-row">
+                <button class="sec-btn primary" onclick="unlockPro(); closePremiumInfoModal();">TOGGLE UNLOCK ($4.99 MOCK)</button>
+                <button class="sec-btn" onclick="closePremiumInfoModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTOR DETAIL MODAL DEEP DIVE -->
+    <div class="sector-modal" id="sector-modal">
+        <div class="sector-detail-card">
+            <div class="panel-header">
+                <span id="modal-sector-title">SECTOR DEEP DIVE</span>
+                <span class="panel-tag permanent" id="modal-sector-lvl">LVL 1</span>
+            </div>
+            
+            <div style="font-size:12px; color:var(--tac-muted); font-weight:700; letter-spacing:1px;" id="modal-sector-domain">
+                DOMAIN READINESS ANALYSIS
+            </div>
+
+            <div style="font-size:13px; color:#FFF; line-height:1.4;" id="modal-sector-desc">
+                Sector metrics description and growth targets.
+            </div>
+
+            <div class="xp-bar-bg" style="height:14px;">
+                <div class="xp-bar-fill" id="modal-sector-bar" style="width: 0%;"></div>
+            </div>
+
+            <div class="panel-header" style="font-size:18px; margin-top:6px; margin-bottom:8px;">
+                <span>RECOMMENDED GROWTH DRILLS</span>
+                <span style="font-size:11px; color:var(--tac-cyan);">TACTICAL ACTIONS</span>
+            </div>
+
+            <div id="modal-suggestions-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Dynamically populated suggestions -->
+            </div>
+
+            <div class="action-row">
+                <button class="sec-btn primary" id="modal-drill-btn">+30 XP QUICK DRILL</button>
+                <button class="sec-btn" onclick="closeSectorModal()">CLOSE DEEP DIVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESET CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="reset-modal">
+        <div class="modal-box" style="border-color:#FF2A55; box-shadow:0 0 30px rgba(255,42,85,0.5);">
+            <div class="modal-title" style="color:#FF2A55;">⚠️ SYSTEM RESET CONFIRMATION</div>
+            <div class="modal-desc">
+                Are you sure you want to reset all of your progress from the very start?
+                <br><br>
+                <strong>This will permanently set all Sector Levels back to 1, wipe your total XP to 0, delete all custom Field Orders, Milestones, and Field Journal entries.</strong>
+            </div>
+            <div class="action-row">
+                <button class="sec-btn danger" onclick="executeFullReset()">YES, RESET ALL</button>
+                <button class="sec-btn" onclick="closeResetModal()">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-container">
+        <!-- MONETIZATION BANNER -->
+        <div class="pro-banner" id="main-pro-banner">
+            <span class="pro-status-text" id="pro-banner-text">RECRUIT FREE TIER // LIMITED TO 6 ORDERS</span>
+            <button class="upgrade-btn-small" id="pro-banner-btn" onclick="openPremiumInfoModal()">UPGRADE PRO</button>
+        </div>
+
+        <!-- TOP HUD -->
+        <header class="hud-header">
+            <div class="top-status-bar">
+                <div class="sys-status">
+                    <div class="blink-dot"></div>
+                    <span id="label-sys-online">TAC-PAD PROTOCOL // ONLINE</span>
+                </div>
+                <div class="streak-badge" id="streak-counter-badge">
+                    🔥 <span id="streak-count-text">0 DAY STREAK</span> (1.0x XP)
+                </div>
+            </div>
+            <div class="callsign-row">
+                <div>
+                    <div style="font-size: 11px; color: var(--tac-muted); font-weight: 800; letter-spacing: 1.5px;" id="label-callsign">OPERATOR CALLSIGN</div>
+                    <div class="operator-title" id="op-title">APEX // ACTUAL</div>
+                </div>
+                <div class="prestige-badge" id="op-rank">TIER V // LEVEL 1</div>
+            </div>
+            <div class="rank-xp-container">
+                <div class="xp-header-row">
+                    <span id="label-progression">CAREER PROGRESSION</span>
+                    <span id="xp-text">0 / 1,000 XP</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill" id="xp-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB 1: HQ HUB -->
+        <div id="tab-hq" class="tab-section active">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span id="label-op-theater">Operational Theater</span>
+                    <span class="panel-tag">ATTRIBUTES MATRIX</span>
+                </div>
+                <div class="radar-box">
+                    <svg class="tac-radar" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="80" fill="none" stroke="#1E2830" stroke-width="1.5"/>
+                        <circle cx="100" cy="100" r="55" fill="none" stroke="#1E2830" stroke-width="1" stroke-dasharray="3,3"/>
+                        <circle cx="100" cy="100" r="30" fill="none" stroke="#1E2830" stroke-width="1" stroke-dasharray="2,2"/>
+                        
+                        <line x1="100" y1="20" x2="100" y2="180" stroke="#1E2830" stroke-width="1"/>
+                        <line x1="20" y1="100" x2="180" y2="100" stroke="#1E2830" stroke-width="1"/>
+                        <line x1="43" y1="43" x2="157" y2="157" stroke="#1E2830" stroke-width="1"/>
+                        <line x1="157" y1="43" x2="43" y2="157" stroke="#1E2830" stroke-width="1"/>
+
+                        <polygon id="radar-polygon" points="100,90 105,95 110,100 105,105 100,110 95,105 90,100 95,95" 
+                                 fill="rgba(0, 255, 102, 0.25)" stroke="var(--tac-green)" stroke-width="2"/>
+
+                        <!-- CLICKABLE RADAR SECTOR LABELS -->
+                        <text x="100" y="14" class="radar-label" text-anchor="middle" onclick="openSectorModal('FIN')">FIN</text>
+                        <text x="168" y="38" class="radar-label" text-anchor="start" onclick="openSectorModal('FAM')">FAM</text>
+                        <text x="186" y="103" class="radar-label" text-anchor="start" onclick="openSectorModal('HEA')">HEA</text>
+                        <text x="168" y="168" class="radar-label" text-anchor="start" onclick="openSectorModal('FAI')">FAI</text>
+                        <text x="100" y="194" class="radar-label" text-anchor="middle" onclick="openSectorModal('MIN')">MIN</text>
+                        <text x="32" y="168" class="radar-label" text-anchor="end" onclick="openSectorModal('CAR')">CAR</text>
+                        <text x="12" y="103" class="radar-label" text-anchor="end" onclick="openSectorModal('SOC')">SOC</text>
+                        <text x="32" y="38" class="radar-label" text-anchor="end" onclick="openSectorModal('ENV')">ENV</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span id="label-sector-readiness">Sector Readiness</span>
+                    <span style="font-size: 11px; color: var(--tac-muted);">TAP SECTOR FOR DEEP DIVE</span>
+                </div>
+                <div class="sector-grid" id="sector-grid"></div>
+            </div>
+        </div>
+
+        <!-- NEW TAB: FAITH & SCRIPTURE MODULE -->
+        <div id="tab-faith" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Faith & Spiritual Fortitude</span>
+                    <span class="panel-tag permanent">FAI SECTOR HQ</span>
+                </div>
+
+                <div class="subnav-bar">
+                    <button class="subnav-btn active" id="subnav-verse" onclick="switchFaithSubnav('verse')">📖 DAILY VERSE</button>
+                    <button class="subnav-btn" id="subnav-journey" onclick="switchFaithSubnav('journey')">🗺️ FAITH JOURNEYS</button>
+                </div>
+
+                <!-- SUBSECTION 1: DAILY BIBLE VERSE ENGINE -->
+                <div id="faith-sec-verse">
+                    <div style="font-size:12px; color:var(--tac-muted); font-weight:700; margin-bottom:8px;">
+                        DAILY SCRIPTURE & TACTICAL REFLECTION
+                    </div>
+
+                    <div class="verse-card" id="daily-verse-box">
+                        <div class="verse-ref">
+                            <span id="verse-ref-title">EPHESIANS 6:10-11</span>
+                            <span style="font-size:11px; color:var(--tac-green);">TODAY'S VERSE</span>
+                        </div>
+                        <div class="verse-text" id="verse-text-content">
+                            "Finally, be strong in the Lord and in his mighty power. Put on the full armor of God, so that you can take your stand against the devil’s schemes."
+                        </div>
+                        <div class="verse-reflection" id="verse-reflection-content">
+                            <strong>🛡️ TACTICAL GROUNDING:</strong> True strength comes from spiritual posture. Approach today's challenges backed by divine armor and steady conviction.
+                        </div>
+                        <div class="action-row" style="margin-top:6px;">
+                            <button class="sec-btn primary" onclick="deployCurrentVerseOrder()">+ DEPLOY SCRIPTURE DRILL (+150 XP)</button>
+                            <button class="sec-btn" onclick="cycleNextVerse()">🔄 NEXT VERSE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBSECTION 2: FAITH JOURNEYS SELECTION -->
+                <div id="faith-sec-journey" style="display:none;">
+                    <div style="font-size:12px; color:var(--tac-muted); font-weight:700; margin-bottom:8px;">
+                        SELECT ACTIVE SPIRITUAL DISCIPLINE JOURNEY
+                    </div>
+
+                    <div class="journey-card selected" id="journey-card-warrior" onclick="selectFaithJourney('warrior')">
+                        <div class="journey-title">
+                            <span>⚔️ WARRIOR DISCIPLINE JOURNEY</span>
+                            <span class="panel-tag permanent">ACTIVE</span>
+                        </div>
+                        <div class="journey-desc">
+                            Focuses on courage, resilience, overcoming adversity, and standing unwavering through hardship.
+                        </div>
+                    </div>
+
+                    <div class="journey-card" id="journey-card-armor" onclick="selectFaithJourney('armor')">
+                        <div class="journey-title">
+                            <span>🛡️ ARMOR OF GOD TRACK</span>
+                            <span class="panel-tag" style="color:var(--tac-cyan); border-color:var(--tac-cyan);">SELECT</span>
+                        </div>
+                        <div class="journey-desc">
+                            Daily focus on Truth, Righteousness, Faith, Salvation, and the Word to guard against distraction and temptation.
+                        </div>
+                    </div>
+
+                    <div class="journey-card" id="journey-card-peace" onclick="selectFaithJourney('peace')">
+                        <div class="journey-title">
+                            <span>🕊️ INNER PEACE & WISDOM TRACK</span>
+                            <span class="panel-tag" style="color:var(--tac-cyan); border-color:var(--tac-cyan);">SELECT</span>
+                        </div>
+                        <div class="journey-desc">
+                            Focuses on stillness, prayer, discernment, releasing anxiety, and resting in divine sovereignty.
+                        </div>
+                    </div>
+
+                    <div class="journey-card" id="journey-card-devotional" onclick="selectFaithJourney('devotional')">
+                        <div class="journey-title">
+                            <span>📖 30-DAY PROVERBS DISCIPLINE</span>
+                            <span class="panel-tag" style="color:var(--tac-cyan); border-color:var(--tac-cyan);">SELECT</span>
+                        </div>
+                        <div class="journey-desc">
+                            Read one chapter of Proverbs daily for maximum mental clarity, leadership, and moral guidance.
+                        </div>
+                    </div>
+
+                    <button class="sec-btn primary" style="margin-top:10px;" onclick="deployJourneyDrill()">
+                        + DEPLOY JOURNEY DRILL TO FIELD ORDERS
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- HEALTH & FITNESS MODULE -->
+        <div id="tab-health" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Physical Conditioning</span>
+                    <span class="panel-tag permanent">HEA SECTOR HQ</span>
+                </div>
+
+                <div class="subnav-bar">
+                    <button class="subnav-btn active" id="subnav-gym" onclick="switchHealthSubnav('gym')">🏋️ GYM SPLITS</button>
+                    <button class="subnav-btn" id="subnav-diet" onclick="switchHealthSubnav('diet')">🥗 MEAL PLANS</button>
+                </div>
+
+                <!-- SUBSECTION: GYM SPLITS & WORKOUTS -->
+                <div id="health-sec-gym">
+                    <div style="font-size:12px; color:var(--tac-muted); font-weight:700; margin-bottom:8px;">
+                        TACTICAL STRENGTH & CONDITIONING SPLITS
+                    </div>
+
+                    <div class="workout-card" style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-green); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>PUSH DAY (CHEST, SHOULDERS, TRICEPS)</span>
+                            <span style="font-size:11px; color:var(--tac-yellow); font-weight:800;">+200 XP</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • Barbell Bench Press: 4 Sets x 6-8 Reps<br>
+                            • Overhead Dumbbell Press: 3 Sets x 8-10 Reps<br>
+                            • Incline Dumbbell Bench: 3 Sets x 10 Reps<br>
+                            • Tricep Cable Pushdowns & Lateral Raises: 4 Sets
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px;" onclick="deploySuggestedOrder('PUSH DAY WORKOUT', 'HEA', 200)">
+                            + DEPLOY TO FIELD ORDERS
+                        </button>
+                    </div>
+
+                    <div class="workout-card" style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-green); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>PULL DAY (BACK, BICEPS, REAR DELTS)</span>
+                            <span style="font-size:11px; color:var(--tac-yellow); font-weight:800;">+200 XP</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • Conventional Deadlifts or Lat Pulldowns: 4 Sets<br>
+                            • Bent-Over Barbell Rows: 3 Sets x 8 Reps<br>
+                            • Dumbbell Bicep Curls: 3 Sets x 12 Reps<br>
+                            • Face Pulls: 4 Sets x 15 Reps
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px;" onclick="deploySuggestedOrder('PULL DAY WORKOUT', 'HEA', 200)">
+                            + DEPLOY TO FIELD ORDERS
+                        </button>
+                    </div>
+
+                    <div class="workout-card" style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-green); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>LEGS & CORE CONDITIONING</span>
+                            <span style="font-size:11px; color:var(--tac-yellow); font-weight:800;">+250 XP</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • Barbell Back Squats: 4 Sets x 6-8 Reps<br>
+                            • Romanian Deadlifts (RDLs): 3 Sets x 10 Reps<br>
+                            • Dumbbell Walking Lunges: 3 Sets x 12 Reps<br>
+                            • Hanging Leg Raises / Planks: 4 Sets to Failure
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px;" onclick="deploySuggestedOrder('LEG DAY WORKOUT', 'HEA', 250)">
+                            + DEPLOY TO FIELD ORDERS
+                        </button>
+                    </div>
+
+                    <div class="workout-card" style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-green); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>CARDIO & ZONE 2 ENDURANCE</span>
+                            <span style="font-size:11px; color:var(--tac-yellow); font-weight:800;">+150 XP</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • 45 Minutes Incline Treadmill Walk or Outdoor Ruck<br>
+                            • Maintain Heart Rate in Zone 2 (60-70% Max HR)<br>
+                            • Target: 10,000 Total Daily Steps
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px;" onclick="deploySuggestedOrder('ZONE 2 CARDIO & 10K STEPS', 'HEA', 150)">
+                            + DEPLOY TO FIELD ORDERS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SUBSECTION: HEALTHY EATING & MEAL PLANS -->
+                <div id="health-sec-diet" style="display:none;">
+                    <div style="font-size:12px; color:var(--tac-muted); font-weight:700; margin-bottom:8px;">
+                        OPERATIONAL NUTRITION & MEAL TEMPLATES
+                    </div>
+
+                    <div style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-cyan); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>🍳 HIGH-PROTEIN OPERATIONAL BASELINE</span>
+                            <span style="font-size:11px; color:var(--tac-cyan); font-weight:800;">1.0g / LB BODYWEIGHT</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • <strong>Meal 1 (Breakfast):</strong> 3 Whole Eggs, 1/2 Cup Oats with Berries & Whey Protein.<br>
+                            • <strong>Meal 2 (Lunch):</strong> 200g Grilled Chicken Breast, 1 Cup Jasmine Rice, Steamed Broccoli.<br>
+                            • <strong>Meal 3 (Snack):</strong> Greek Yogurt (0% Fat) with Almonds & Honey.<br>
+                            • <strong>Meal 4 (Dinner):</strong> 200g Lean Ground Beef or Salmon, Sweet Potato, Mixed Greens.<br>
+                            • <strong>Hydration Protocol:</strong> 1 Gallon (3.8L) Water + Electrolytes daily.
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px; border-color:var(--tac-cyan); color:var(--tac-cyan);" onclick="deploySuggestedOrder('HIT DAILY MACROS & 1 GAL WATER', 'HEA', 180)">
+                            + DEPLOY DAILY NUTRITION ORDER
+                        </button>
+                    </div>
+
+                    <div style="background:rgba(0,0,0,0.5); border:1px solid var(--tac-border); border-left:4px solid var(--tac-cyan); padding:12px; margin-bottom:10px;">
+                        <div style="font-size:16px; font-weight:700; color:#FFF; display:flex; justify-content:space-between;">
+                            <span>🥩 LOW-CARB / FAT LOSS PROTOCOL</span>
+                            <span style="font-size:11px; color:var(--tac-cyan); font-weight:800;">CALORIC DEFICIT</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--tac-text); line-height:1.4; margin-top:4px;">
+                            • <strong>Focus:</strong> High Protein & Healthy Fats, Zero Refined Sugars.<br>
+                            • <strong>Meal 1:</strong> Scrambled Eggs with Avocado & Spinach.<br>
+                            • <strong>Meal 2:</strong> Turkey Breast Bowl with Avocado & Extra Green Vegetables.<br>
+                            • <strong>Meal 3:</strong> Grilled Steak or Salmon Salad with Olive Oil Dressing.
+                        </div>
+                        <button class="sec-btn primary" style="margin-top:6px; border-color:var(--tac-cyan); color:var(--tac-cyan);" onclick="deploySuggestedOrder('ZERO REFINED SUGAR DAY', 'HEA', 150)">
+                            + DEPLOY SUGAR CUT ORDER
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: PERMANENT DIRECTIVES -->
+        <div id="tab-directives" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Permanent Directives</span>
+                    <span class="panel-tag permanent">ACTIONABLE RULES</span>
+                </div>
+                <div id="directive-list"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: DAILY FIELD ORDERS -->
+        <div id="tab-orders" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Daily Field Orders</span>
+                    <span id="order-counter" class="panel-tag">0/0 CLEARED</span>
+                </div>
+                <div id="order-list"></div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Create Custom Order</span>
+                    <span class="panel-tag">+ OBJECTIVE</span>
+                </div>
+                <input type="text" id="new-order-title" class="input-box" placeholder="Field Order Title (e.g. 1 Hour Workout)">
+                <div class="add-form-row">
+                    <select id="new-order-domain" class="input-box" style="flex:1;">
+                        <option value="HEA">HEA - HEALTH</option>
+                        <option value="FIN">FIN - FINANCES</option>
+                        <option value="FAM">FAM - FAMILY</option>
+                        <option value="FAI">FAI - FAITH</option>
+                        <option value="MIN">MIN - MIND</option>
+                        <option value="CAR">CAR - CAREER</option>
+                        <option value="SOC">SOC - SOCIAL</option>
+                        <option value="ENV">ENV - ENVIRONMENT</option>
+                    </select>
+                    <input type="number" id="new-order-xp" class="input-box" placeholder="XP" value="150" style="width:80px;">
+                </div>
+                <button class="sec-btn primary" onclick="addCustomOrder()">+ DEPLOY NEW FIELD ORDER</button>
+            </div>
+        </div>
+
+        <!-- TAB 4: FOCUS TIMER / POMODORO -->
+        <div id="tab-timer" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Tactical Focus Timer</span>
+                    <span class="panel-tag" id="timer-mode-tag">DEEP WORK (25 MIN)</span>
+                </div>
+
+                <div class="timer-display" id="timer-clock">25:00</div>
+
+                <div class="action-row">
+                    <button class="sec-btn primary" id="timer-start-btn" onclick="toggleTimer()">▶ START MISSION</button>
+                    <button class="sec-btn" onclick="resetTimer()">🔄 RESET</button>
+                </div>
+
+                <div class="setting-row" style="margin-top:10px;">
+                    <div class="setting-label-box">
+                        <div class="setting-title">AMBIENT NOISE GENERATOR</div>
+                        <div class="setting-desc">Tactical low-frequency focus audio</div>
+                    </div>
+                    <button class="sec-btn" style="width:100px;" id="ambient-btn" onclick="toggleAmbientNoise()">AUDIO OFF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: OPERATIONAL MILESTONES -->
+        <div id="tab-milestones" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Operational Milestones</span>
+                    <span class="panel-tag">ACHIEVEMENTS</span>
+                </div>
+                <div id="milestone-list"></div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Set Long-Term Milestone</span>
+                    <span class="panel-tag">+ TARGET</span>
+                </div>
+                <input type="text" id="ms-title" class="input-box" placeholder="Milestone Target (e.g. Save $10k Emergency Fund)">
+                <div class="add-form-row">
+                    <select id="ms-domain" class="input-box" style="flex:1;">
+                        <option value="FIN">FIN - FINANCES</option>
+                        <option value="HEA">HEA - HEALTH</option>
+                        <option value="CAR">CAR - CAREER</option>
+                        <option value="FAM">FAM - FAMILY</option>
+                        <option value="FAI">FAI - FAITH</option>
+                        <option value="MIN">MIN - MIND</option>
+                        <option value="SOC">SOC - SOCIAL</option>
+                        <option value="ENV">ENV - ENVIRONMENT</option>
+                    </select>
+                    <input type="number" id="ms-xp" class="input-box" placeholder="Reward XP" value="500" style="width:100px;">
+                </div>
+                <button class="sec-btn primary" onclick="addMilestone()">+ REGISTER MILESTONE TARGET</button>
+            </div>
+        </div>
+
+        <!-- TAB 6: LOGS & ANALYTICS -->
+        <div id="tab-journal" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>30-Day Performance Analytics</span>
+                    <span class="panel-tag">XP TRENDS</span>
+                </div>
+                
+                <div class="chart-container" id="analytics-chart">
+                    <!-- Dynamically filled SVG Bar Chart -->
+                </div>
+                <div style="font-size:11px; color:var(--tac-muted); text-align:center; margin-top:6px; font-weight:700;">
+                    LAST 7 DAYS XP OUTPUT SUMMARY
+                </div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>After Action Report</span>
+                    <span class="panel-tag">FIELD JOURNAL</span>
+                </div>
+                <textarea id="journal-input" class="input-box" placeholder="Record today's victories, discipline failures, tactical insights..."></textarea>
+                <button class="sec-btn primary" onclick="addJournalEntry()">💾 LOG AFTER ACTION REPORT</button>
+                
+                <div class="ai-feedback-box" id="ai-aar-box">
+                    <strong>🤖 RECON OFFICER DEBRIEF [PRO UNLOCKED]:</strong><br>
+                    <span id="ai-aar-content">"System operating at optimal efficiency. Continue logging daily AAR debriefs to update baseline performance metrics."</span>
+                </div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Mission Logs & Backups</span>
+                    <span class="panel-tag">HISTORY</span>
+                </div>
+                <div id="journal-list"></div>
+                
+                <div class="action-row">
+                    <button class="sec-btn" onclick="exportData()">💾 BACKUP DATA</button>
+                    <button class="sec-btn danger" onclick="openResetModal()">🔄 RESET ALL PROGRESS TO ZERO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 7: IN-APP RECON STORE -->
+        <div id="tab-store" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>Armory & Store</span>
+                    <span class="panel-tag" style="color:var(--tac-yellow); border-color:var(--tac-yellow);">PRO UNLOCKS</span>
+                </div>
+
+                <div class="store-card">
+                    <div class="store-info">
+                        <div class="store-title">⚡ BATTLE PASS PRO UNLOCK</div>
+                        <div class="store-desc">Unlimited Orders, AI AAR Analysis, Cloud Sync</div>
+                    </div>
+                    <button class="buy-btn" id="pro-buy-btn" onclick="openPremiumInfoModal()">$4.99/MO</button>
+                </div>
+
+                <div class="store-card">
+                    <div class="store-info">
+                        <div class="store-title">🧊 STREAK FREEZE PASS</div>
+                        <div class="store-desc">Protect your daily streak bonus if you miss a day</div>
+                    </div>
+                    <button class="buy-btn" onclick="buyStreakFreeze()">500 XP</button>
+                </div>
+
+                <div class="store-card">
+                    <div class="store-info">
+                        <div class="store-title">🎨 HUD COLOR THEME PACKS</div>
+                        <div class="store-desc">Cyber Cyan, Crimson, Gold, OLED Black, Desert, Violet</div>
+                    </div>
+                    <button class="buy-btn" onclick="openThemeSelector()">UNLOCK</button>
+                </div>
+
+                <div class="store-card">
+                    <div class="store-info">
+                        <div class="store-title">🎯 OPERATION 75 HARD PACK</div>
+                        <div class="store-desc">Pre-loaded 90-day physical conditioning campaign</div>
+                    </div>
+                    <button class="buy-btn" onclick="unlockCampaign()">$2.99</button>
+                </div>
+            </div>
+
+            <div class="tac-panel" id="theme-selector-box" style="display:none;">
+                <div class="panel-header">
+                    <span>Active Interface Theme</span>
+                    <span class="panel-tag">COSMETICS</span>
+                </div>
+                <div class="action-row">
+                    <button class="sec-btn" onclick="setTheme('default')">STEALTH GREEN</button>
+                    <button class="sec-btn" onclick="setTheme('cyan')">CYBER CYAN</button>
+                </div>
+                <div class="action-row">
+                    <button class="sec-btn" onclick="setTheme('crimson')">CRIMSON</button>
+                    <button class="sec-btn" onclick="setTheme('gold')">GOLD</button>
+                </div>
+                <div class="action-row">
+                    <button class="sec-btn" onclick="setTheme('oled')">OLED BLACK</button>
+                    <button class="sec-btn" onclick="setTheme('desert')">DESERT RECON</button>
+                    <button class="sec-btn" onclick="setTheme('violet')">VIOLET</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 8: SYSTEM SETTINGS -->
+        <div id="tab-settings" class="tab-section">
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>System Settings</span>
+                    <span class="panel-tag">PREFERENCES</span>
+                </div>
+
+                <!-- AUDIO TOGGLE -->
+                <div class="setting-row">
+                    <div class="setting-label-box">
+                        <div class="setting-title">SYNTHESIZED AUDIO SFX</div>
+                        <div class="setting-desc">Enable interface click tones & victory sound effects</div>
+                    </div>
+                    <div class="toggle-switch active" id="toggle-sfx" onclick="toggleAudioSetting()">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <!-- REGION / LANGUAGE -->
+                <div class="setting-row">
+                    <div class="setting-label-box">
+                        <div class="setting-title">LANGUAGE & REGION</div>
+                        <div class="setting-desc">Select interface localization</div>
+                    </div>
+                    <select id="setting-language" class="input-box" style="width: 140px; margin-bottom:0;" onchange="changeLanguageSetting()">
+                        <option value="EN">ENGLISH (US)</option>
+                        <option value="ES">ESPAÑOL</option>
+                        <option value="FR">FRANÇAIS</option>
+                        <option value="DE">DEUTSCH</option>
+                        <option value="JA">日本語</option>
+                    </select>
+                </div>
+
+                <!-- CALLSIGN EDIT -->
+                <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:8px;">
+                    <div class="setting-label-box">
+                        <div class="setting-title">OPERATOR CALLSIGN</div>
+                        <div class="setting-desc">Customize your HUD operator identity title</div>
+                    </div>
+                    <div style="display:flex; gap:8px; width:100%;">
+                        <input type="text" id="callsign-input" class="input-box" style="margin-bottom:0;" value="APEX // ACTUAL">
+                        <button class="sec-btn primary" style="width:90px;" onclick="saveCallsign()">SAVE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tac-panel">
+                <div class="panel-header">
+                    <span>System Diagnostics</span>
+                    <span class="panel-tag">TAC-NET v22.0</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-label-box">
+                        <div class="setting-title">CURRENT CORE VERSION</div>
+                        <div class="setting-desc" id="version-label">v22.0.0 Faith & Scripture Expansion Edition</div>
+                    </div>
+                    <button class="sec-btn primary" style="width:130px; font-size:14px;" onclick="checkForUpdates()">CHECK UPDATES</button>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-label-box">
+                        <div class="setting-title">DATA MANAGEMENT</div>
+                        <div class="setting-desc">Wipe all progress or export JSON backup</div>
+                    </div>
+                    <button class="sec-btn danger" style="width:130px; font-size:14px;" onclick="openResetModal()">RESET SYSTEM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="cod-nav">
+        <div class="cod-nav-item active" onclick="switchTab('hq', this)">
+            <span style="font-size: 13px;">🎖️</span>
+            <span>HQ</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('faith', this)">
+            <span style="font-size: 13px;">✝️</span>
+            <span>FAITH</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('health', this)">
+            <span style="font-size: 13px;">💪</span>
+            <span>FITNESS</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('directives', this)">
+            <span style="font-size: 13px;">🛡️</span>
+            <span>RULES</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('orders', this)">
+            <span style="font-size: 13px;">⚔️</span>
+            <span>ORDERS</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('timer', this)">
+            <span style="font-size: 13px;">⏱️</span>
+            <span>TIMER</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('milestones', this)">
+            <span style="font-size: 13px;">🏅</span>
+            <span>GOALS</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('journal', this)">
+            <span style="font-size: 13px;">📊</span>
+            <span>LOGS</span>
+        </div>
+        <div class="cod-nav-item" id="nav-store" onclick="switchTab('store', this)">
+            <span style="font-size: 13px;">🛒</span>
+            <span>STORE</span>
+        </div>
+        <div class="cod-nav-item" onclick="switchTab('settings', this)">
+            <span style="font-size: 13px;">⚙️</span>
+            <span>SETTING</span>
+        </div>
+    </nav>
+
+    <script>
+        // BIBLE VERSES DATABASE
+        const bibleVerses = [
+            {
+                ref: "EPHESIANS 6:10-11",
+                text: "Finally, be strong in the Lord and in his mighty power. Put on the full armor of God, so that you can take your stand against the devil’s schemes.",
+                reflection: "🛡️ TACTICAL GROUNDING: True strength comes from spiritual posture. Approach today's challenges backed by divine armor and steady conviction."
+            },
+            {
+                ref: "JOSHUA 1:9",
+                text: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.",
+                reflection: "⚔️ WARRIOR POSTURE: Fear is an illusion that shrinks under divine command. Step forward with total courage."
+            },
+            {
+                ref: "PROVERBS 27:17",
+                text: "As iron sharpens iron, so one person sharpens another.",
+                reflection: "🤝 ALLIANCE BUILDING: Surround yourself with men and women of high discipline who raise your operational standard."
+            },
+            {
+                ref: "ISAIAH 40:31",
+                text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint.",
+                reflection: "🦅 ENDURANCE INDEX: Physical fatigue is temporary. Rest your hope in something higher to unlock infinite reserves."
+            },
+            {
+                ref: "2 TIMOTHY 1:7",
+                text: "For God has not given us a spirit of fear, but of power and of love and of a sound mind.",
+                reflection: "🧠 MENTAL SANCTUARY: Fear does not originate from your Creator. Calibrate your mind with self-discipline and purpose."
+            }
+        ];
+
+        let currentVerseIdx = 0;
+        let selectedFaithJourney = localStorage.getItem('tac_faith_journey') || 'warrior';
+
+        // EXPANDED SOUND ENGINE WITH MULTIPLE AUDIO PROFILES
+        let isAudioEnabled = localStorage.getItem('tac_audio_enabled') !== 'false';
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTacticalSound(type) {
+            if (!isAudioEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'complete') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'reset') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else if (type === 'timer_done') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            }
+        }
+
+        // AMBIENT FOCUS NOISE GENERATOR
+        let ambientOsc = null;
+        let ambientGain = null;
+        let isAmbientActive = false;
+
+        function toggleAmbientNoise() {
+            if (isAmbientActive) {
+                if (ambientOsc) ambientOsc.stop();
+                isAmbientActive = false;
+                document.getElementById('ambient-btn').innerText = "AUDIO OFF";
+                showToast("AMBIENT FOCUS AUDIO STOPPED");
+            } else {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                ambientOsc = audioCtx.createOscillator();
+                ambientGain = audioCtx.createGain();
+                ambientOsc.type = 'sine';
+                ambientOsc.frequency.setValueAtTime(110, audioCtx.currentTime);
+                ambientGain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                ambientOsc.connect(ambientGain);
+                ambientGain.connect(audioCtx.destination);
+                ambientOsc.start();
+                isAmbientActive = true;
+                document.getElementById('ambient-btn').innerText = "AUDIO ON 🔊";
+                showToast("TACTICAL AMBIENT NOISE ACTIVE");
+            }
+        }
+
+        const permanentDirectives = [
+            {
+                code: 'DIRECTIVE 01',
+                title: 'NON-NEGOTIABLE DISCIPLINE',
+                rule: 'Action precedes motivation. Execute mandatory daily drills without hesitation.',
+                hint: 'Rely on rigid friction-less triggers (e.g. laying out workout clothes the night before).'
+            },
+            {
+                code: 'DIRECTIVE 02',
+                title: 'ZERO-COMPROMISE DOMAINS',
+                rule: 'Never sacrifice family or health for temporary financial or career acceleration.',
+                hint: 'High career XP without health balance causes radar collapse. Protect health daily.'
+            }
+        ];
+
+        const zeroSectors = [
+            { id: 'FIN', name: 'FINANCES', lvl: 1, xp: 0, max: 100 },
+            { id: 'FAM', name: 'FAMILY', lvl: 1, xp: 0, max: 100 },
+            { id: 'HEA', name: 'HEALTH', lvl: 1, xp: 0, max: 100 },
+            { id: 'FAI', name: 'FAITH', lvl: 1, xp: 0, max: 100 },
+            { id: 'MIN', name: 'MIND', lvl: 1, xp: 0, max: 100 },
+            { id: 'CAR', name: 'CAREER', lvl: 1, xp: 0, max: 100 },
+            { id: 'SOC', name: 'SOCIAL', lvl: 1, xp: 0, max: 100 },
+            { id: 'ENV', name: 'INTEL/ENV', lvl: 1, xp: 0, max: 100 }
+        ];
+
+        const sectorDatabase = {
+            FIN: { domain: "FINANCIAL FORTRESS", desc: "Capital accumulation & budgeting.", suggestions: [{ title: "ZERO-BASED BUDGET AUDIT", desc: "Track every dollar spent today.", xp: 150 }] },
+            FAM: { domain: "FAMILY FORTRESS", desc: "Domestic bonds & relationships.", suggestions: [{ title: "60-MIN ZERO-SCREEN FAMILY OP", desc: "100% focused quality time.", xp: 180 }] },
+            HEA: { domain: "PHYSICAL CONDITIONING", desc: "Cardio, muscle & sleep hygiene.", suggestions: [{ title: "PUSH DAY WORKOUT", desc: "Chest, Shoulders & Triceps gym session.", xp: 200 }, { title: "PULL DAY WORKOUT", desc: "Back, Biceps & Rear Delts gym session.", xp: 200 }, { title: "LEG DAY WORKOUT", desc: "Squats & Romanian Deadlifts session.", xp: 250 }] },
+            FAI: { domain: "FAITH & PURPOSE", desc: "Moral values & mental grounding.", suggestions: [{ title: "DAILY SCRIPTURE & MEDITATION", desc: "Read Ephesians 6:10-11 & reflect.", xp: 150 }, { title: "WARRIOR PRAYER & DEVOTIONAL", desc: "15 mins uninterrupted prayer.", xp: 180 }] },
+            MIN: { domain: "MENTAL ACUITY", desc: "Deep study & focus.", suggestions: [{ title: "90-MIN DEEP WORK SPRINT", desc: "Uninterrupted focus session.", xp: 250 }] },
+            CAR: { domain: "CAREER EXPANSION", desc: "Skills & market valuation.", suggestions: [{ title: "SKILL ACQUISITION DRILL", desc: "45 mins technical practice.", xp: 200 }] },
+            SOC: { domain: "SOCIAL NETWORK", desc: "Peer networks & alliances.", suggestions: [{ title: "PEER ALLIANCE REACHOUT", desc: "Contact an ambitious peer.", xp: 150 }] },
+            ENV: { domain: "INTEL & ENVIRONMENT", desc: "Workspace clarity.", suggestions: [{ title: "OPERATIONAL WORKSPACE PURGE", desc: "Sanitize main desk area.", xp: 120 }] }
+        };
+
+        let sectors = JSON.parse(localStorage.getItem('tac_sectors')) || zeroSectors;
+        let fieldOrders = JSON.parse(localStorage.getItem('tac_orders')) || [];
+        let milestones = JSON.parse(localStorage.getItem('tac_milestones')) || [];
+        let journalEntries = JSON.parse(localStorage.getItem('tac_journal')) || [];
+        let globalXP = parseInt(localStorage.getItem('tac_global_xp')) || 0;
+        let globalMax = parseInt(localStorage.getItem('tac_global_max')) || 1000;
+        let operatorLevel = parseInt(localStorage.getItem('tac_op_lvl')) || 1;
+        let isProUnlocked = localStorage.getItem('tac_pro_unlocked') === 'true';
+        let currentCallsign = localStorage.getItem('tac_callsign') || 'APEX // ACTUAL';
+        let currentLang = localStorage.getItem('tac_lang') || 'EN';
+        let streakCount = parseInt(localStorage.getItem('tac_streak_count')) || 0;
+        let streakFreezes = parseInt(localStorage.getItem('tac_streak_freezes')) || 0;
+        let dailyHistory = JSON.parse(localStorage.getItem('tac_daily_history')) || [120, 300, 450, 200, 600, 150, 400];
+
+        // FOCUS TIMER VARIABLES
+        let timerInterval = null;
+        let timerTimeLeft = 25 * 60;
+        let isTimerRunning = false;
+
+        function switchFaithSubnav(sub) {
+            playTacticalSound('click');
+            if (sub === 'verse') {
+                document.getElementById('faith-sec-verse').style.display = 'block';
+                document.getElementById('faith-sec-journey').style.display = 'none';
+                document.getElementById('subnav-verse').classList.add('active');
+                document.getElementById('subnav-journey').classList.remove('active');
+            } else {
+                document.getElementById('faith-sec-verse').style.display = 'none';
+                document.getElementById('faith-sec-journey').style.display = 'block';
+                document.getElementById('subnav-verse').classList.remove('active');
+                document.getElementById('subnav-journey').classList.add('active');
+            }
+        }
+
+        function renderVerseDisplay() {
+            const v = bibleVerses[currentVerseIdx];
+            document.getElementById('verse-ref-title').innerText = v.ref;
+            document.getElementById('verse-text-content').innerText = `"${v.text}"`;
+            document.getElementById('verse-reflection-content').innerHTML = `<strong>🛡️ TACTICAL GROUNDING:</strong> ${v.reflection.replace(/^[^:]*:\s*/, '')}`;
+        }
+
+        function cycleNextVerse() {
+            playTacticalSound('click');
+            currentVerseIdx = (currentVerseIdx + 1) % bibleVerses.length;
+            renderVerseDisplay();
+        }
+
+        function deployCurrentVerseOrder() {
+            const v = bibleVerses[currentVerseIdx];
+            deploySuggestedOrder(`SCRIPTURE DRILL // ${v.ref}`, 'FAI', 150);
+        }
+
+        function selectFaithJourney(key) {
+            playTacticalSound('click');
+            selectedFaithJourney = key;
+            localStorage.setItem('tac_faith_journey', key);
+
+            document.querySelectorAll('.journey-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`journey-card-${key}`).classList.add('selected');
+            showToast(`FAITH JOURNEY ACTIVATED: ${key.toUpperCase()}`);
+        }
+
+        function deployJourneyDrill() {
+            const journeyTitles = {
+                warrior: "WARRIOR PRAYER & COURAGE DRILL",
+                armor: "ARMOR OF GOD SCRIPTURE MEDITATION",
+                peace: "INNER PEACE & DISCERNMENT SESSION",
+                devotional: "PROVERBS DAILY CHAPTER STUDY"
+            };
+            const title = journeyTitles[selectedFaithJourney] || "DAILY SPIRITUAL DRILL";
+            deploySuggestedOrder(title, 'FAI', 180);
+        }
+
+        function switchHealthSubnav(sub) {
+            playTacticalSound('click');
+            if (sub === 'gym') {
+                document.getElementById('health-sec-gym').style.display = 'block';
+                document.getElementById('health-sec-diet').style.display = 'none';
+                document.getElementById('subnav-gym').classList.add('active');
+                document.getElementById('subnav-diet').classList.remove('active');
+            } else {
+                document.getElementById('health-sec-gym').style.display = 'none';
+                document.getElementById('health-sec-diet').style.display = 'block';
+                document.getElementById('subnav-gym').classList.remove('active');
+                document.getElementById('subnav-diet').classList.add('active');
+            }
+        }
+
+        function calculateTier(lvl) {
+            if (lvl >= 100) return 'TIER I // MASTER OPERATOR';
+            if (lvl >= 75) return 'TIER II // DIAMOND OPERATOR';
+            if (lvl >= 50) return 'TIER III // PLATINUM OPERATOR';
+            if (lvl >= 25) return 'TIER IV // GOLD OPERATOR';
+            return 'TIER V // RECRUIT OPERATOR';
+        }
+
+        function saveData() {
+            localStorage.setItem('tac_sectors', JSON.stringify(sectors));
+            localStorage.setItem('tac_orders', JSON.stringify(fieldOrders));
+            localStorage.setItem('tac_milestones', JSON.stringify(milestones));
+            localStorage.setItem('tac_journal', JSON.stringify(journalEntries));
+            localStorage.setItem('tac_global_xp', globalXP.toString());
+            localStorage.setItem('tac_global_max', globalMax.toString());
+            localStorage.setItem('tac_op_lvl', operatorLevel.toString());
+            localStorage.setItem('tac_pro_unlocked', isProUnlocked.toString());
+            localStorage.setItem('tac_audio_enabled', isAudioEnabled.toString());
+            localStorage.setItem('tac_callsign', currentCallsign);
+            localStorage.setItem('tac_lang', currentLang);
+            localStorage.setItem('tac_streak_count', streakCount.toString());
+            localStorage.setItem('tac_streak_freezes', streakFreezes.toString());
+            localStorage.setItem('tac_daily_history', JSON.stringify(dailyHistory));
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('tac-toast');
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        function switchTab(tabId, el) {
+            playTacticalSound('click');
+            document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.cod-nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            if (el) el.classList.add('active');
+        }
+
+        function openPremiumInfoModal() {
+            playTacticalSound('click');
+            document.getElementById('premium-info-modal').classList.add('active');
+        }
+
+        function closePremiumInfoModal() {
+            playTacticalSound('click');
+            document.getElementById('premium-info-modal').classList.remove('active');
+        }
+
+        function toggleTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('timer-start-btn').innerText = "▶ RESUME MISSION";
+                showToast("MISSION TIMER PAUSED");
+            } else {
+                isTimerRunning = true;
+                document.getElementById('timer-start-btn').innerText = "⏸ PAUSE MISSION";
+                timerInterval = setInterval(() => {
+                    if (timerTimeLeft > 0) {
+                        timerTimeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        playTacticalSound('timer_done');
+                        showToast("MISSION COMPLETE! +200 XP BONUS AWARDED");
+                        addXP(4, 200);
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerTimeLeft / 60).toString().padStart(2, '0');
+            const s = (timerTimeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-clock').innerText = `${m}:${s}`;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerTimeLeft = 25 * 60;
+            updateTimerDisplay();
+            document.getElementById('timer-start-btn').innerText = "▶ START MISSION";
+        }
+
+        function buyStreakFreeze() {
+            if (globalXP < 500) {
+                alert("INSUFFICIENT XP. YOU NEED AT LEAST 500 XP TO PURCHASE A STREAK FREEZE.");
+                return;
+            }
+            globalXP -= 500;
+            streakFreezes += 1;
+            saveData();
+            showToast("STREAK FREEZE PASS ACQUIRED!");
+            document.getElementById('xp-text').innerText = `${globalXP} / ${globalMax} XP`;
+        }
+
+        function renderAnalyticsChart() {
+            const chart = document.getElementById('analytics-chart');
+            chart.innerHTML = '';
+            const max = Math.max(...dailyHistory, 500);
+            dailyHistory.forEach((val, i) => {
+                const pct = (val / max) * 100;
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'chart-bar-wrapper';
+                barWrapper.innerHTML = `
+                    <div class="chart-bar" style="height:${pct}%;"></div>
+                    <div class="chart-label">D${i+1}</div>
+                `;
+                chart.appendChild(barWrapper);
+            });
+        }
+
+        function openSectorModal(sectorId) {
+            playTacticalSound('click');
+            const sectorIdx = sectors.findIndex(s => s.id === sectorId);
+            if (sectorIdx === -1) return;
+
+            const s = sectors[sectorIdx];
+            const data = sectorDatabase[sectorId] || { domain: "SECTOR READINESS", desc: "General growth domain.", suggestions: [] };
+
+            document.getElementById('modal-sector-title').innerText = `${s.name} SECTOR`;
+            document.getElementById('modal-sector-lvl').innerText = `LVL ${s.lvl} (${s.xp}/${s.max} XP)`;
+            document.getElementById('modal-sector-domain').innerText = data.domain;
+            document.getElementById('modal-sector-desc').innerText = data.desc;
+            document.getElementById('modal-sector-bar').style.width = `${(s.xp / s.max) * 100}%`;
+
+            const sugList = document.getElementById('modal-suggestions-list');
+            sugList.innerHTML = '';
+
+            data.suggestions.forEach(sug => {
+                const card = document.createElement('div');
+                card.className = 'suggestion-card';
+                card.innerHTML = `
+                    <div class="suggestion-title">🎯 ${sug.title}</div>
+                    <div class="suggestion-desc">${sug.desc}</div>
+                    <button class="add-suggested-btn" onclick="deploySuggestedOrder('${sug.title}', '${sectorId}', ${sug.xp})">
+                        + DEPLOY TO ORDERS (+${sug.xp} XP)
+                    </button>
+                `;
+                sugList.appendChild(card);
+            });
+
+            document.getElementById('modal-drill-btn').onclick = function() {
+                addXP(sectorIdx, 30);
+                openSectorModal(sectorId);
+            };
+
+            document.getElementById('sector-modal').classList.add('active');
+        }
+
+        function closeSectorModal() {
+            playTacticalSound('click');
+            document.getElementById('sector-modal').classList.remove('active');
+        }
+
+        function deploySuggestedOrder(title, domain, xp) {
+            playTacticalSound('click');
+            if (!isProUnlocked && fieldOrders.length >= 6) {
+                alert("FREE TIER LIMIT REACHED (6 ORDERS). Upgrade to Battle Pass Pro in Store for Unlimited Orders!");
+                closeSectorModal();
+                switchTab('store', document.getElementById('nav-store'));
+                return;
+            }
+
+            fieldOrders.push({ id: Date.now(), title: title, domain: domain, xp: xp, completed: false });
+            saveData();
+            renderOrders();
+            showToast("ORDER DEPLOYED TO ORDERS TAB");
+        }
+
+        function toggleAudioSetting() {
+            isAudioEnabled = !isAudioEnabled;
+            const toggle = document.getElementById('toggle-sfx');
+            if (isAudioEnabled) {
+                toggle.classList.add('active');
+                showToast("AUDIO SFX ENABLED");
+                playTacticalSound('click');
+            } else {
+                toggle.classList.remove('active');
+                showToast("AUDIO SFX MUTED");
+            }
+            saveData();
+        }
+
+        function changeLanguageSetting() {
+            currentLang = document.getElementById('setting-language').value;
+            saveData();
+            showToast(`LANGUAGE UPDATED: ${currentLang}`);
+        }
+
+        function saveCallsign() {
+            const val = document.getElementById('callsign-input').value.trim();
+            if (!val) return;
+            currentCallsign = val.toUpperCase();
+            document.getElementById('op-title').innerText = currentCallsign;
+            saveData();
+            showToast("CALLSIGN UPDATED");
+        }
+
+        function checkForUpdates() {
+            playTacticalSound('click');
+            showToast("CHECKING TAC-NET SERVERS...");
+            setTimeout(() => {
+                showToast("TAC-PAD v22.0 IS UP TO DATE // FAITH MODULE ACTIVE");
+            }, 1200);
+        }
+
+        function openResetModal() {
+            playTacticalSound('click');
+            document.getElementById('reset-modal').classList.add('active');
+        }
+
+        function closeResetModal() {
+            playTacticalSound('click');
+            document.getElementById('reset-modal').classList.remove('active');
+        }
+
+        function executeFullReset() {
+            playTacticalSound('reset');
+            localStorage.clear();
+            
+            sectors = zeroSectors.map(s => ({ ...s }));
+            fieldOrders = [];
+            milestones = [];
+            journalEntries = [];
+            globalXP = 0;
+            globalMax = 1000;
+            operatorLevel = 1;
+            isProUnlocked = false;
+            streakCount = 0;
+
+            saveData();
+            closeResetModal();
+
+            updateProUIState();
+            document.getElementById('op-rank').innerText = `${calculateTier(operatorLevel)} // LEVEL ${operatorLevel}`;
+            document.getElementById('xp-text').innerText = `${globalXP} / ${globalMax} XP`;
+            document.getElementById('xp-fill').style.width = `0%`;
+            document.getElementById('streak-count-text').innerText = `0 DAY STREAK`;
+
+            renderSectors();
+            renderOrders();
+            renderMilestones();
+            renderJournal();
+            renderAnalyticsChart();
+
+            showToast("SYSTEM WIPED // ALL PROGRESS RESET TO ZERO");
+        }
+
+        function unlockPro() {
+            playTacticalSound('complete');
+            isProUnlocked = !isProUnlocked;
+            saveData();
+            updateProUIState();
+            showToast(isProUnlocked ? 'PRO BATTLE PASS ACTIVATED!' : 'REVERTED TO FREE TIER');
+        }
+
+        function updateProUIState() {
+            const banner = document.getElementById('main-pro-banner');
+            const text = document.getElementById('pro-banner-text');
+            const btn = document.getElementById('pro-banner-btn');
+            const buyBtn = document.getElementById('pro-buy-btn');
+
+            if (isProUnlocked) {
+                banner.classList.add('unlocked');
+                text.innerText = 'PRO OPERATOR PASS ACTIVE // UNLIMITED ACCESS';
+                btn.innerText = 'PRO ACTIVE';
+                buyBtn.innerText = 'UNLOCKED';
+                buyBtn.style.background = 'var(--tac-green)';
+            } else {
+                banner.classList.remove('unlocked');
+                text.innerText = 'RECRUIT FREE TIER // LIMITED TO 6 ORDERS';
+                btn.innerText = 'UPGRADE PRO';
+                buyBtn.innerText = '$4.99/MO';
+                buyBtn.style.background = 'var(--tac-yellow)';
+            }
+        }
+
+        function openThemeSelector() {
+            playTacticalSound('click');
+            document.getElementById('theme-selector-box').style.display = 'block';
+            showToast('THEME SELECTOR UNLOCKED');
+        }
+
+        function setTheme(theme) {
+            playTacticalSound('click');
+            document.body.className = '';
+            if (theme !== 'default') document.body.classList.add(`theme-${theme}`);
+            showToast(`THEME UPDATED: ${theme.toUpperCase()}`);
+        }
+
+        function unlockCampaign() {
+            playTacticalSound('complete');
+            fieldOrders.push({ id: Date.now(), title: 'CAMPAIGN // 75 HARD WATER & DIET', domain: 'HEA', xp: 250, completed: false });
+            saveData();
+            renderOrders();
+            showToast('CAMPAIGN PACK DEPLOYED TO ORDERS');
+        }
+
+        function renderDirectives() {
+            const list = document.getElementById('directive-list');
+            list.innerHTML = '';
+            permanentDirectives.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'directive-card';
+                item.innerHTML = `
+                    <div class="directive-header"><span class="directive-code">🔒 ${d.code}</span></div>
+                    <div class="directive-title">${d.title}</div>
+                    <div style="font-size:13px; color:#FFF; font-weight:600;">${d.rule}</div>
+                    <div class="directive-box"><strong>💡 TIP:</strong> ${d.hint}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderSectors() {
+            const grid = document.getElementById('sector-grid');
+            grid.innerHTML = '';
+            sectors.forEach((s, idx) => {
+                const card = document.createElement('div');
+                card.className = 'sector-card';
+                card.onclick = function() { openSectorModal(s.id); };
+                card.innerHTML = `
+                    <div class="sector-title-row">
+                        <span class="sector-code">${s.name}</span>
+                        <span class="sector-lvl">LVL ${s.lvl}</span>
+                    </div>
+                    <div class="sector-bar-bg"><div class="sector-bar-fill" style="width: ${(s.xp / s.max) * 100}%"></div></div>
+                    <div class="sector-tap-hint">TAP FOR DEEP DIVE ➔</div>
+                    <button class="deploy-btn" onclick="event.stopPropagation(); addXP(${idx}, 30)">+30 XP DRILL</button>
+                `;
+                grid.appendChild(card);
+            });
+            updateRadar();
+        }
+
+        function renderOrders() {
+            const list = document.getElementById('order-list');
+            list.innerHTML = '';
+            let completedCount = 0;
+            fieldOrders.forEach((o) => {
+                if(o.completed) completedCount++;
+                const item = document.createElement('div');
+                item.className = `order-item ${o.completed ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <div class="order-info">
+                        <div class="order-title">${o.title}</div>
+                        <div class="order-reward">+${o.xp} XP // [${o.domain} REWARD]</div>
+                    </div>
+                    <button class="complete-checkbox" onclick="toggleOrder(${o.id})">✓</button>
+                `;
+                list.appendChild(item);
+            });
+            document.getElementById('order-counter').innerText = `${completedCount}/${fieldOrders.length} CLEARED`;
+        }
+
+        function renderMilestones() {
+            const list = document.getElementById('milestone-list');
+            list.innerHTML = '';
+            milestones.forEach((m) => {
+                const item = document.createElement('div');
+                item.className = `order-item ${m.completed ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <div class="order-info">
+                        <div class="order-title">🎖️ ${m.title}</div>
+                        <div class="order-reward">+${m.xp} XP // [${m.domain} MILESTONE]</div>
+                    </div>
+                    <button class="complete-checkbox" onclick="toggleMilestone(${m.id})">✓</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderJournal() {
+            const list = document.getElementById('journal-list');
+            list.innerHTML = '';
+            if (journalEntries.length === 0) {
+                list.innerHTML = `<div style="font-size:12px; color:var(--tac-muted); text-align:center; padding:10px;">NO JOURNAL LOGS RECORDED. WRITE AN AFTER ACTION REPORT ABOVE.</div>`;
+                return;
+            }
+            journalEntries.forEach((j) => {
+                const card = document.createElement('div');
+                card.className = 'journal-card';
+                card.innerHTML = `<div class="journal-date">${j.date}</div><div class="journal-text">${j.text}</div>`;
+                list.appendChild(card);
+            });
+        }
+
+        function addXP(sectorIdx, amount) {
+            playTacticalSound('click');
+            const multiplier = 1 + (streakCount * 0.05);
+            const finalAmount = Math.floor(amount * multiplier);
+
+            const s = sectors[sectorIdx];
+            s.xp += finalAmount;
+            globalXP += finalAmount;
+
+            if (globalXP >= globalMax) {
+                globalXP -= globalMax;
+                operatorLevel += 1;
+                globalMax = Math.floor(globalMax * 1.15);
+                playTacticalSound('complete');
+                showToast(`OPERATOR LEVEL UP! LEVEL ${operatorLevel}`);
+            }
+
+            if (s.xp >= s.max) {
+                s.xp -= s.max;
+                s.lvl += 1;
+                playTacticalSound('complete');
+                showToast(`SECTOR PROMOTION! ${s.name} IS NOW LVL ${s.lvl}`);
+            } else {
+                showToast(`+${finalAmount} XP LOGGED // ${s.name}`);
+            }
+
+            document.getElementById('op-rank').innerText = `${calculateTier(operatorLevel)} // LEVEL ${operatorLevel}`;
+            document.getElementById('xp-text').innerText = `${globalXP} / ${globalMax} XP`;
+            document.getElementById('xp-fill').style.width = `${(globalXP / globalMax) * 100}%`;
+            saveData();
+            renderSectors();
+        }
+
+        function toggleOrder(id) {
+            const o = fieldOrders.find(o => o.id === id);
+            if (!o) return;
+            o.completed = !o.completed;
+            if (o.completed) {
+                playTacticalSound('complete');
+                const idx = sectors.findIndex(s => s.id === o.domain);
+                if (idx !== -1) addXP(idx, o.xp);
+                streakCount += 1;
+                document.getElementById('streak-count-text').innerText = `${streakCount} DAY STREAK`;
+            } else {
+                playTacticalSound('click');
+                saveData();
+                renderOrders();
+            }
+        }
+
+        function toggleMilestone(id) {
+            const m = milestones.find(m => m.id === id);
+            if (!m) return;
+            m.completed = !m.completed;
+            if (m.completed) {
+                playTacticalSound('complete');
+                const idx = sectors.findIndex(s => s.id === m.domain);
+                if (idx !== -1) addXP(idx, m.xp);
+            } else {
+                playTacticalSound('click');
+                saveData();
+                renderMilestones();
+            }
+        }
+
+        function addCustomOrder() {
+            playTacticalSound('click');
+            if (!isProUnlocked && fieldOrders.length >= 6) {
+                alert("FREE TIER LIMIT REACHED (6 ORDERS). Upgrade to Battle Pass Pro in Store for Unlimited Orders!");
+                switchTab('store', document.getElementById('nav-store'));
+                return;
+            }
+            const title = document.getElementById('new-order-title').value.trim();
+            const domain = document.getElementById('new-order-domain').value;
+            const xp = parseInt(document.getElementById('new-order-xp').value) || 100;
+            if (!title) return;
+
+            fieldOrders.push({ id: Date.now(), title: title.toUpperCase(), domain: domain, xp: xp, completed: false });
+            document.getElementById('new-order-title').value = '';
+            saveData();
+            renderOrders();
+            showToast("FIELD ORDER DEPLOYED");
+        }
+
+        function addMilestone() {
+            playTacticalSound('click');
+            const title = document.getElementById('ms-title').value.trim();
+            const domain = document.getElementById('ms-domain').value;
+            const xp = parseInt(document.getElementById('ms-xp').value) || 500;
+            if (!title) return;
+
+            milestones.push({ id: Date.now(), title: title.toUpperCase(), domain: domain, xp: xp, completed: false });
+            document.getElementById('ms-title').value = '';
+            saveData();
+            renderMilestones();
+            showToast("MILESTONE TARGET REGISTERED");
+        }
+
+        function addJournalEntry() {
+            playTacticalSound('click');
+            const text = document.getElementById('journal-input').value.trim();
+            if (!text) return;
+            const now = new Date();
+            const dateStr = `${now.toISOString().split('T')[0]} // ${now.toTimeString().split(' ')[0]}`;
+
+            journalEntries.unshift({ id: Date.now(), date: dateStr, text: text });
+            document.getElementById('journal-input').value = '';
+
+            if (isProUnlocked) {
+                document.getElementById('ai-aar-content').innerText = `"AAR DEBRIEF ANALYZED: Discipline logged. Focus consistency index high. Maintain current trajectory."`;
+            }
+
+            saveData();
+            renderJournal();
+            showToast("AAR LOG SAVED");
+        }
+
+        function updateRadar() {
+            const center = 100;
+            const maxRadius = 80;
+            const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+            const points = sectors.map((s, i) => {
+                const angleRad = (angles[i] - 90) * (Math.PI / 180);
+                const scale = Math.min(s.lvl / 30, 1);
+                const r = scale * maxRadius;
+                const x = center + r * Math.cos(angleRad);
+                const y = center + r * Math.sin(angleRad);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+            document.getElementById('radar-polygon').setAttribute('points', points);
+        }
+
+        function exportData() {
+            playTacticalSound('click');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                sectors, fieldOrders, milestones, journalEntries, globalXP, globalMax, operatorLevel, isProUnlocked, streakCount
+            }));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "tacpad_protocol_v22_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("PRO BACKUP EXPORTED");
+        }
+
+        // INITIALIZE APP STATE
+        if (!isAudioEnabled) {
+            document.getElementById('toggle-sfx').classList.remove('active');
+        }
+        document.getElementById('setting-language').value = currentLang;
+        document.getElementById('callsign-input').value = currentCallsign;
+        document.getElementById('op-title').innerText = currentCallsign;
+        document.getElementById('streak-count-text').innerText = `${streakCount} DAY STREAK`;
+
+        updateProUIState();
+        renderVerseDisplay();
+        selectFaithJourney(selectedFaithJourney);
+
+        document.getElementById('op-rank').innerText = `${calculateTier(operatorLevel)} // LEVEL ${operatorLevel}`;
+        document.getElementById('xp-text').innerText = `${globalXP} / ${globalMax} XP`;
+        document.getElementById('xp-fill').style.width = `${(globalXP / globalMax) * 100}%`;
+        renderDirectives();
+        renderSectors();
+        renderOrders();
+        renderMilestones();
+        renderJournal();
+        renderAnalyticsChart();
+    </script>
+</body>
+</html>
